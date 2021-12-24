@@ -18,7 +18,7 @@ pcl::visualization::PCLVisualizer::Ptr initScene(Box window, int zoom)
   	viewer->setCameraPosition(0, 0, zoom, 0, 1, 0);
   	viewer->addCoordinateSystem (1.0);
 
-  	viewer->addCube(window.x_min, window.x_max, window.y_min, window.y_max, 0, 0, 1, 1, 1, "window");
+  	viewer->addCube(window.x_min, window.x_max, window.y_min, window.y_max, 0, 0, 0, 0, 0, "window");
   	return viewer;
 }
 
@@ -72,6 +72,19 @@ void render2DTree(Node* node, pcl::visualization::PCLVisualizer::Ptr& viewer, Bo
 
 
 	}
+}
+
+void clusterHelper(int index, const std::vector<std::vector<float>> points, std::vector<int>& cluster, std::vector<bool>& processed,KdTree* tree, float distanceTol){
+
+  processed[index] = true;
+  cluster.push_back(index);
+
+  std::vector<int> nearest = tree->search(points[index],distanceTol);
+
+  for(int id: nearest){
+    if(!(processed[id]))
+      clusterHelper(id,points,cluster,processed,tree,distanceTol);
+  }
 
 }
 
@@ -80,8 +93,19 @@ std::vector<std::vector<int>> euclideanCluster(const std::vector<std::vector<flo
 
 	// TODO: Fill out this function to return list of indices for each cluster
 
-	std::vector<std::vector<int>> clusters;
- 
+	std::vector<std::vector<int>> clusters; 
+  
+  int _points_size = points.size();
+  std::vector<bool> processed(_points_size,false);
+
+  for(int i = 0; i< _points_size ; i++){
+    if(processed[i]) continue;
+    std::vector<int> _cluster;
+
+    clusterHelper(i, points, _cluster, processed, tree, distanceTol);
+    clusters.push_back(_cluster);
+
+  }
 	return clusters;
 
 }
@@ -129,7 +153,7 @@ int main ()
 
   	// Render clusters
   	int clusterId = 0;
-	std::vector<Color> colors = {Color(1,0,0), Color(0,1,0), Color(0,0,1)};
+	std::vector<Color> colors = {Color(1,0.5,0), Color(0.5,1,0.5), Color(0.5,0.5,1)};
   	for(std::vector<int> cluster : clusters)
   	{
   		pcl::PointCloud<pcl::PointXYZ>::Ptr clusterCloud(new pcl::PointCloud<pcl::PointXYZ>());
