@@ -1,5 +1,5 @@
 // PCL lib Functions for processing point clouds 
-
+#include <boost/filesystem.hpp>
 #ifndef PROCESSPOINTCLOUDS_H_
 #define PROCESSPOINTCLOUDS_H_
 
