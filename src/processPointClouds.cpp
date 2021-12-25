@@ -37,19 +37,39 @@ typename pcl::PointCloud<PointT>::Ptr ProcessPointClouds<PointT>::FilterCloud(ty
     sor.setLeafSize (filterRes,filterRes,filterRes);
     sor.filter (*cloud_filtered);
 
-    typename pcl::PointCloud<PointT>::Ptr crop_box_filtered (new pcl::PointCloud<PointT>);
+    typename pcl::PointCloud<PointT>::Ptr region_filtered (new pcl::PointCloud<PointT>);
     
     pcl::CropBox<PointT> cb(true);
     cb.setMin(minPoint);
     cb.setMax(maxPoint);
     cb.setInputCloud(cloud_filtered);
-    cb.filter(*crop_box_filtered);   
+    cb.filter(*region_filtered);  
 
+    // filtering out the roof , optional 
+    std::vector<int> to_remove;
+    // identifying the roof point indices from the region filtered
+  	pcl::CropBox<PointT> roof(true);
+  	roof.setMin(Eigen::Vector4f (-3, -2, -1, 1));
+  	roof.setMax(Eigen::Vector4f(3, 2, 1, 1));
+  	roof.setInputCloud(region_filtered);
+  	roof.filter(to_remove);
+    
+
+  	pcl::PointIndices::Ptr inliers (new pcl::PointIndices);
+  	for (int point : to_remove)
+    	inliers->indices.push_back(point);
+  
+  	pcl::ExtractIndices<PointT> extract;
+  	extract.setInputCloud(region_filtered);
+  	extract.setIndices(inliers);
+  	extract.setNegative(true);
+  	extract.filter(*region_filtered);
+  
     auto endTime = std::chrono::steady_clock::now();
     auto elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
     std::cout << "filtering took " << elapsedTime.count() << " milliseconds" << std::endl;
 
-    return crop_box_filtered;
+    return region_filtered;
 
 }
 
