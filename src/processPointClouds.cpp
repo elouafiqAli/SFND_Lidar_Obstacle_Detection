@@ -224,7 +224,6 @@ std::vector<std::vector<int>> ProcessPointClouds<PointT>::euclideanCluster(const
 
 		if (_cluster.size() >= minSize && _cluster.size() <= maxSize) 
 			clusters.push_back(_cluster);
-		else	for(int rollback : _cluster) processed[rollback] = false;    
 
 	}
     return clusters;

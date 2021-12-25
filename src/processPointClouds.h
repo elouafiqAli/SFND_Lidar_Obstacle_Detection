@@ -19,7 +19,7 @@
 #include <chrono>
 #include "render/box.h"
 #include <unordered_set>
-#include "quiz/cluster/kdtree.h"
+#include "helper/kdtree.h"
 
 template<typename PointT>
 class ProcessPointClouds {
@@ -48,6 +48,7 @@ public:
 
     std::vector<boost::filesystem::path> streamPcd(std::string dataPath);
 
+// adding Eucledian Clustering and RANSAC to the ProcessPointClouds
 private: 
 
     std::unordered_set<int> Ransac(typename pcl::PointCloud<PointT>::Ptr cloud, int maxIterations, float distanceTol);
