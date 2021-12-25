@@ -19,7 +19,7 @@
 #include <chrono>
 #include "render/box.h"
 #include <unordered_set>
-
+#include "quiz/cluster/kdtree.h"
 
 template<typename PointT>
 class ProcessPointClouds {
@@ -51,7 +51,10 @@ public:
 private: 
 
     std::unordered_set<int> Ransac(typename pcl::PointCloud<PointT>::Ptr cloud, int maxIterations, float distanceTol);
-
+    
+    void clusterHelper(int index, const std::vector<std::vector<float>> points, std::vector<int>& cluster, std::vector<bool>& processed,KdTree* tree, float distanceTol);
+    
+    std::vector<std::vector<int>> euclideanCluster(const std::vector<std::vector<float>>& points, KdTree* tree, float distanceTol, int minSize, int maxSize);
   
 };
 #endif /* PROCESSPOINTCLOUDS_H_ */

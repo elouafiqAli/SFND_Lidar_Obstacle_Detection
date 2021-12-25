@@ -4,8 +4,9 @@
 #include "../../render/render.h"
 #define X 	0
 #define Y 	1
-#define XY  2
-#define BOX	4
+#define Z	2
+#define XYZ 3
+#define BOX	6
 #define square(a) (a*a)
 // Structure to represent node of kd tree
 struct Node
@@ -44,12 +45,12 @@ struct KdTree
 		if( *node == NULL){
 			*node = new Node(point,id);
 		}else{
-			uint cd = depth % XY;
+			uint cd = depth % XYZ;
 
 			if( point[cd] < ((*node)->point[cd])  ){
-				insertHelper(&((*node)->left),depth +X+Y,point,id);
+				insertHelper(&((*node)->left),depth+1,point,id);
 			}else{
-				insertHelper(&((*node)->right),depth +X+Y,point,id);
+				insertHelper(&((*node)->right),depth+1,point,id);
 			}
 		}
 
@@ -62,13 +63,20 @@ struct KdTree
 	}
 
 	float getDistance( Node *node,std::vector<float> target, float distanceTol){
-		float targetBox[BOX],distance[XY];
-		targetBox[X] 	= target[X] - distanceTol; 	targetBox[X+XY]	= target[X] + distanceTol;
-		targetBox[Y] 	= target[Y] - distanceTol; 	targetBox[Y+XY]	= target[Y] + distanceTol;
-		distance[X] 	= node->point[X]-target[X]; distance[Y]		= node->point[Y]-target[Y];
-		if(( targetBox[X] <= node->point[X] && node->point[X]  <= targetBox[X+XY] )
-		  && 	( targetBox[Y] <= node->point[Y] && node->point[Y]  <= targetBox[Y+XY] ))
-			return sqrt(distance[X]*distance[X]+distance[Y]*distance[Y]);
+		float targetBox[BOX],distance[XYZ];
+		targetBox[X] 	= target[X] - distanceTol; 	targetBox[X+XYZ]	= target[X] + distanceTol;
+		targetBox[Y] 	= target[Y] - distanceTol; 	targetBox[Y+XYZ]	= target[Y] + distanceTol;
+		targetBox[Z] 	= target[Z] - distanceTol; 	targetBox[Z+XYZ]	= target[Z] + distanceTol;
+
+		distance[X] 	= node->point[X]-target[X]; 
+		distance[Y]		= node->point[Y]-target[Y];
+		distance[Z]		= node->point[Z]-target[Z];
+		if(( targetBox[X] <= node->point[X] && node->point[X]  <= targetBox[X+XYZ] )
+		  && 	( targetBox[Y] <= node->point[Y] && node->point[Y]  <= targetBox[Y+XYZ] )
+		  &&	( targetBox[Z] <= node->point[Z] && node->point[Z]  <= targetBox[Z+XYZ] ))
+			return sqrt(distance[X]*distance[X] 
+					+ distance[Y]*distance[Y]
+					+ distance[Z]*distance[Z]);
 		else	
 			return -1;
 		
@@ -82,10 +90,10 @@ struct KdTree
 			if( -1 < distance  && distance <= distanceTol)
 				search_results.push_back(node->id); 
 
-			if((target[depth % XY] - distanceTol) < node->point[depth % XY])
-				searchSideKick(node->left, target, depth +X+Y, distanceTol, search_results);
-			if((target[depth % XY] + distanceTol) > node->point[depth % XY])
-				searchSideKick(node->right, target, depth +X+Y, distanceTol, search_results);
+			if((target[depth % XYZ] - distanceTol) < node->point[depth % XYZ])
+				searchSideKick(node->left, target, depth+1, distanceTol, search_results);
+			if((target[depth % XYZ] + distanceTol) > node->point[depth % XYZ])
+				searchSideKick(node->right, target, depth+1, distanceTol, search_results);
 		}
 		 
 
