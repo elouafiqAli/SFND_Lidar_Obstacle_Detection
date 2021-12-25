@@ -48,8 +48,8 @@ typename pcl::PointCloud<PointT>::Ptr ProcessPointClouds<PointT>::FilterCloud(ty
     std::vector<int> to_remove;
     // identifying the roof point indices from the region filtered
   	pcl::CropBox<PointT> roof(true);
-  	roof.setMin(Eigen::Vector4f (-3, -2, -1, 1));
-  	roof.setMax(Eigen::Vector4f(3, 2, 1, 1));
+  	roof.setMin(Eigen::Vector4f (-2, -2, -1, 1));
+  	roof.setMax(Eigen::Vector4f(2.6, 1.7, -.4, 1));
   	roof.setInputCloud(region_filtered);
   	roof.filter(to_remove);
     
@@ -224,6 +224,7 @@ std::vector<std::vector<int>> ProcessPointClouds<PointT>::euclideanCluster(const
 
 		if (_cluster.size() >= minSize && _cluster.size() <= maxSize) 
 			clusters.push_back(_cluster);
+        else for(int rollback : _cluster) processed[rollback]=false;
 
 	}
     return clusters;
@@ -238,24 +239,6 @@ std::vector<typename pcl::PointCloud<PointT>::Ptr> ProcessPointClouds<PointT>::C
     auto startTime = std::chrono::steady_clock::now();
 
     std::vector<typename pcl::PointCloud<PointT>::Ptr> clusters;
-
-    // TODO:: Fill in the function to perform euclidean clustering to group detected obstacles
-    // Creating the KdTree object for the search method of the extraction
-
-    /* typename pcl::search::KdTree<PointT>::Ptr tree (new pcl::search::KdTree<PointT>);
-
-    tree->setInputCloud (cloud);
-
-    std::vector<pcl::PointIndices> cluster_indices;
-    pcl::EuclideanClusterExtraction<PointT> ec;
-
-    ec.setClusterTolerance (clusterTolerance); // 2cm
-    ec.setMinClusterSize (minSize);
-    ec.setMaxClusterSize (maxSize);
-    ec.setSearchMethod (tree);
-    ec.setInputCloud (cloud);
-    ec.extract (cluster_indices);
-    */
     
     std::vector<std::vector<float>> points ;
 	for (int i=0; i<cloud->points.size(); i++) 
